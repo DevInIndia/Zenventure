@@ -17,7 +17,8 @@ export default function AuthPage() {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         // User is signed in, redirect to dashboard
-        router.push("/dashboard");
+        router.push("/onboarding");
+        // router.push("/dashboard");
       }
     });
 

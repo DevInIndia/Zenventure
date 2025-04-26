@@ -1,14 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Bell, Moon, Sun, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
 import { Badge } from "@/components/ui/badge";
 import { auth } from "@/lib/firebase";
-import { signOut } from "firebase/auth";
+import { signOut, getAuth, onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"; // Import Avatar components
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface TopBarProps {
   xp: number;
@@ -23,9 +30,33 @@ export function TopBar({ xp, streak, mood, health, mana }: TopBarProps) {
   const [notifications, setNotifications] = useState(2);
   const router = useRouter();
 
+  const [user, setUser] = useState<{
+    name: string;
+    email: string;
+    image?: string;
+  } | null>(null);
+
   // Calculate level based on XP (simple formula)
   const level = Math.floor(xp / 100) + 1;
   const levelProgress = xp % 100; // XP needed for next level
+
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser({
+          name: user.displayName || "User",
+          email: user.email || "user@example.com",
+          image: user.photoURL || "",
+        });
+      } else {
+        setUser(null);
+        router.push("/auth");
+      }
+    });
+
+    return () => unsubscribe();
+  }, [router]);
 
   const handleSignOut = async () => {
     try {
@@ -114,14 +145,38 @@ export function TopBar({ xp, streak, mood, health, mana }: TopBarProps) {
           )}
         </Button>
 
-        <Button
+        {/* <Button
           variant="ghost"
           size="icon"
           onClick={handleSignOut}
           title="Sign Out"
         >
           <LogOut className="h-5 w-5 text-[#f9c80e]" />
-        </Button>
+        </Button> */}
+        {user && (
+          <div className="px-4 py-2 border-gray-300">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <div className="flex items-center gap-3 cursor-pointer">
+                  <Avatar>
+                    <AvatarImage src={user.image} alt={user.name} />
+                    <AvatarFallback>{user.name[0]}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="text-sm font-medium">{user.name}</p>
+                    <p className="text-xs text-gray-500">{user.email}</p>
+                  </div>
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56">
+                <DropdownMenuItem onClick={handleSignOut}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Logout</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
       </div>
     </header>
   );
