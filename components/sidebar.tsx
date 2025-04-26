@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Home, Brain, Dumbbell, Target,ScrollText } from "lucide-react";
+import { Home, Brain, Dumbbell, Target, ScrollText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function Sidebar() {
@@ -11,13 +11,20 @@ export function Sidebar() {
 
   const menuItems = [
     { id: "home", icon: Home, label: "HOME", href: "/dashboard" },
-    { id: "mind", icon: Brain, label: "MIND", href: "/dashboard/mind" },
-    { id: "body", icon: Dumbbell, label: "BODY", href: "/dashboard/body" },
-    { id: "streaks", icon: Target, label: "STREAKS", href: "/dashboard/streaks" },
+    // { id: "mind", icon: Brain, label: "MIND", href: "/dashboard/mind" },
+    // { id: "body", icon: Dumbbell, label: "BODY", href: "/dashboard/body" },
+    {
+      id: "streaks",
+      icon: Target,
+      label: "STREAKS",
+      href: "/dashboard/streaks",
+    },
   ];
 
   const getActiveItemId = () => {
-    const sortedMenuItems = [...menuItems].sort((a, b) => b.href.length - a.href.length);
+    const sortedMenuItems = [...menuItems].sort(
+      (a, b) => b.href.length - a.href.length
+    );
 
     const activeItem = sortedMenuItems.find((item) =>
       pathname.startsWith(item.href)
