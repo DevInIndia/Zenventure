@@ -1,31 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Home, ScrollText, Brain, Dumbbell, Target } from "lucide-react";
+import { Home, Brain, Dumbbell, Target,ScrollText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function Sidebar() {
-  const [activeItem, setActiveItem] = useState("home");
+  const pathname = usePathname();
 
   const menuItems = [
     { id: "home", icon: Home, label: "HOME", href: "/dashboard" },
-    {
-      id: "quests",
-      icon: ScrollText,
-      label: "QUESTS",
-      href: "/dashboard/quests",
-    },
     { id: "mind", icon: Brain, label: "MIND", href: "/dashboard/mind" },
     { id: "body", icon: Dumbbell, label: "BODY", href: "/dashboard/body" },
-    {
-      id: "streaks",
-      icon: Target,
-      label: "STREAKS",
-      href: "/dashboard/streaks",
-    },
+    { id: "streaks", icon: Target, label: "STREAKS", href: "/dashboard/streaks" },
   ];
+
+  const getActiveItemId = () => {
+    const sortedMenuItems = [...menuItems].sort((a, b) => b.href.length - a.href.length);
+
+    const activeItem = sortedMenuItems.find((item) =>
+      pathname.startsWith(item.href)
+    );
+
+    if (pathname === "/profile") return "profile"; // Special case for profile
+
+    return activeItem ? activeItem.id : "";
+  };
+
+  const activeItemId = getActiveItemId();
 
   return (
     <aside className="w-16 md:w-64 bg-[#352f44] border-r-4 border-[#5c5470]">
@@ -47,13 +50,12 @@ export function Sidebar() {
                   <Button
                     variant="ghost"
                     className={`w-full justify-start relative ${
-                      activeItem === item.id
+                      activeItemId === item.id
                         ? "bg-[#5c5470] text-[#f9c80e]"
                         : "text-[#dbd8e3] hover:bg-[#5c5470] hover:text-[#f9c80e]"
                     }`}
-                    onClick={() => setActiveItem(item.id)}
                   >
-                    {activeItem === item.id && (
+                    {activeItemId === item.id && (
                       <motion.div
                         layoutId="activeIndicator"
                         className="absolute left-0 top-0 bottom-0 w-1 bg-[#f9c80e]"
@@ -77,9 +79,21 @@ export function Sidebar() {
           <Link href="/profile" passHref>
             <Button
               variant="ghost"
-              className="w-full justify-start bg-[#5c5470] hover:bg-[#6c6480] text-[#dbd8e3]"
-              onClick={() => setActiveItem("profile")}
+              className={`w-full justify-start relative ${
+                activeItemId === "profile"
+                  ? "bg-[#5c5470] text-[#f9c80e]"
+                  : "text-[#dbd8e3] hover:bg-[#5c5470] hover:text-[#f9c80e]"
+              }`}
             >
+              {activeItemId === "profile" && (
+                <motion.div
+                  layoutId="activeIndicator"
+                  className="absolute left-0 top-0 bottom-0 w-1 bg-[#f9c80e]"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.2 }}
+                />
+              )}
               <div className="h-8 w-8 bg-[#f9c80e] flex items-center justify-center text-black mr-2 border-2 border-black">
                 <span className="text-xs font-medium">LV1</span>
               </div>
