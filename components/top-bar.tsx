@@ -2,10 +2,13 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Bell, Moon, Sun } from "lucide-react";
+import { Bell, Moon, Sun, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
 import { Badge } from "@/components/ui/badge";
+import { auth } from "@/lib/firebase";
+import { signOut } from "firebase/auth";
+import { useRouter } from "next/navigation";
 
 interface TopBarProps {
   xp: number;
@@ -18,10 +21,20 @@ interface TopBarProps {
 export function TopBar({ xp, streak, mood, health, mana }: TopBarProps) {
   const { theme, setTheme } = useTheme();
   const [notifications, setNotifications] = useState(2);
+  const router = useRouter();
 
   // Calculate level based on XP (simple formula)
   const level = Math.floor(xp / 100) + 1;
   const levelProgress = xp % 100; // XP needed for next level
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      router.push("/");
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
 
   return (
     <header className="h-20 bg-[#352f44] border-b-4 border-[#5c5470] flex items-center justify-between px-4">
@@ -99,6 +112,15 @@ export function TopBar({ xp, streak, mood, health, mana }: TopBarProps) {
               {notifications}
             </motion.div>
           )}
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleSignOut}
+          title="Sign Out"
+        >
+          <LogOut className="h-5 w-5 text-[#f9c80e]" />
         </Button>
       </div>
     </header>

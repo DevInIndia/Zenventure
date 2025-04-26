@@ -1,25 +1,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { MainDashboard } from "@/components/main-dashboard";
 import { mockQuests } from "@/lib/mock-data";
+import { auth } from "@/lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
 export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
+  const [userName, setUserName] = useState("");
 
   useEffect(() => {
-    // Check if user has completed onboarding
-    const userGoal = localStorage.getItem("userGoal");
-    const userLevel = localStorage.getItem("userLevel");
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // User is signed in
+        setUserName(user.displayName || "Adventurer");
+        setIsLoading(false);
+      }
+    });
 
-    if (!userGoal || !userLevel) {
-      router.push("/");
-    } else {
-      setIsLoading(false);
-    }
-  }, [router]);
+    return () => unsubscribe();
+  }, []);
 
   if (isLoading) {
     return (
@@ -29,5 +30,5 @@ export default function DashboardPage() {
     );
   }
 
-  return <MainDashboard quests={mockQuests} />;
+  return <MainDashboard quests={mockQuests} userName={userName} />;
 }

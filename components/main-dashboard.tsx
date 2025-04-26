@@ -9,9 +9,10 @@ import type { Quest } from "@/lib/types";
 
 interface MainDashboardProps {
   quests: Quest[];
+  userName: string;
 }
 
-export function MainDashboard({ quests }: MainDashboardProps) {
+export function MainDashboard({ quests, userName }: MainDashboardProps) {
   const [activeQuests, setActiveQuests] = useState<Quest[]>(quests);
   const [xp, setXp] = useState(0);
   const [streak, setStreak] = useState(0);
@@ -54,7 +55,9 @@ export function MainDashboard({ quests }: MainDashboardProps) {
               transition={{ duration: 0.5 }}
             >
               <div className="pixel-card bg-[#352f44] p-4 mb-6 flex items-center">
-                <h1 className="text-xl text-[#f9c80e]">TODAY'S QUESTS</h1>
+                <h1 className="text-xl text-[#f9c80e]">
+                  WELCOME, {userName.toUpperCase()}
+                </h1>
                 <div className="ml-auto flex items-center gap-2">
                   <div className="text-xs text-[#dbd8e3]">ACTIVE QUESTS:</div>
                   <div className="text-[#f9c80e]">{activeQuests.length}</div>
