@@ -1,7 +1,8 @@
 // src/app/api/users/route.ts
-import { db } from "@/src/firebaseConfig"; // your Firestore init
+import { db } from "@/lib/firebase";
 import { userSchema } from "@/lib/schemas/userSchema";
 import { NextRequest, NextResponse } from "next/server";
+import { collection, doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore"; 
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -12,10 +13,13 @@ export async function POST(req: NextRequest) {
   }
 
   const userData = parsed.data;
-  await db.collection("users").doc(userData.uid).set({
+
+  const userRef = doc(db, "users", userData.uid);
+
+  await setDoc(userRef, {
     ...userData,
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    createdAt: serverTimestamp(), // server time
+    updatedAt: serverTimestamp(),
   });
 
   return NextResponse.json({ message: "User created" });
@@ -29,11 +33,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "UID is required" }, { status: 400 });
   }
 
-  const userDoc = await db.collection("users").doc(uid).get();
+  const userRef = doc(db, "users", uid);
+  const userSnap = await getDoc(userRef);
 
-  if (!userDoc.exists) {
+  if (!userSnap.exists()) {
     return NextResponse.json({ user: null });
   }
 
-  return NextResponse.json({ user: userDoc.data() });
+  return NextResponse.json({ user: userSnap.data() });
 }
