@@ -29,6 +29,15 @@ export function RadarChart({ stats }: RadarChartProps) {
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstance = useRef<Chart | null>(null);
 
+  // Legend data with rank levels and their descriptions
+  const legendData = [
+    { name: "Novice", color: "#FF6B6B", value: "0-20" },
+    { name: "Apprentice", color: "#FFD166", value: "21-40" },
+    { name: "Adept", color: "#06D6A0", value: "41-60" },
+    { name: "Expert", color: "#118AB2", value: "61-80" },
+    { name: "Master", color: "#9381FF", value: "81-100" },
+  ];
+
   useEffect(() => {
     if (!chartRef.current) return;
 
@@ -48,13 +57,7 @@ export function RadarChart({ stats }: RadarChartProps) {
         datasets: [
           {
             label: "Your Stats",
-            data: [
-              Math.min(stats.mindful / 10, 100),
-              Math.min(stats.productive / 10, 100),
-              Math.min(stats.fit / 10, 100),
-              Math.min(stats.discipline, 100),
-              Math.min(stats.balanced, 100),
-            ],
+            data: [80, 60, 90, 75, 50], // <-- hardcoded dummy values to check visibility
             backgroundColor: "rgba(99, 102, 241, 0.2)",
             borderColor: "rgba(99, 102, 241, 1)",
             borderWidth: 2,
@@ -65,6 +68,7 @@ export function RadarChart({ stats }: RadarChartProps) {
             pointRadius: 4,
           },
         ],
+        
       },
       options: {
         scales: {
@@ -119,8 +123,31 @@ export function RadarChart({ stats }: RadarChartProps) {
   }, [stats]);
 
   return (
-    <div className="h-80">
-      <canvas ref={chartRef} />
+    <div className="flex flex-col md:flex-row">
+  <div className="h-80 flex-1">
+    <canvas ref={chartRef} className="w-full h-full" />
+    </div>
+  
+      {/* Legend container */}
+      <div className="ml-auto mt-6 md:mt-0 md:ml-10 bg-[#3d3a4b] p-4 border-2 border-[#5c5470] rounded-lg w-full max-w-xs">
+        <h3 className="text-[#f9c80e] text-base mb-4 font-bold tracking-wide">STAT LEVELS</h3>
+        <div className="space-y-3">
+          {legendData.map((item, index) => (
+            <div key={index} className="flex items-center justify-between">
+              <div className="flex items-center">
+                <div
+                  className="w-4 h-4 mr-3 rounded-full"
+                  style={{ backgroundColor: item.color }}
+                ></div>
+                <span className="text-sm text-[#dbd8e3]">{item.name}</span>
+              </div>
+              <span className="text-sm text-[#f9c80e]">{item.value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
     </div>
   );
+  
 }
