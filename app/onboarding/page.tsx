@@ -16,6 +16,8 @@ import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { createUserProfile } from "@/lib/firestore";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 type Goal = "productivity" | "fitness" | "mindfulness" | null;
 type Level = "beginner" | "intermediate" | "expert" | null;
@@ -28,10 +30,15 @@ export default function OnboardingPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        // User is not signed in, redirect to auth page
         router.push("/auth");
+      } else {
+        // Check if user profile already exists
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          router.push("/dashboard");
+        }
       }
     });
 

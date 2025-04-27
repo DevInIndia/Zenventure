@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { auth, googleProvider } from "@/lib/firebase";
 import { onAuthStateChanged, signInWithPopup } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -14,11 +16,18 @@ export default function AuthPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // User is signed in, redirect to dashboard
-        router.push("/onboarding");
-        // router.push("/dashboard");
+        // Check if user profile exists in Firestore
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        
+        if (userDoc.exists()) {
+          // User exists, go directly to dashboard
+          router.push("/dashboard");
+        } else {
+          // New user, go to onboarding
+          router.push("/onboarding");
+        }
       }
     });
 

@@ -29,62 +29,62 @@ export async function createUserProfile(goal: string, level: string) {
   const userRef = doc(db, "users", user.uid);
   const userDoc = await getDoc(userRef);
 
-  // Only create if user doesn't exist
-  if (!userDoc.exists()) {
-    const today = new Date();
-    const todayStr = today.toISOString().split("T")[0];
-
-    const initialStats: UserStats = {
-      mindful: 0,
-      productive: 0,
-      fit: 0,
-      discipline: 0,
-      balanced: 0,
-    };
-
-    const initialStreakHistory: DailyStreak[] = [
-      { date: todayStr, completed: false, points: 0 },
-    ];
-
-    const newUser: UserProfile = {
-      uid: user.uid,
-      displayName: user.displayName || "Adventurer",
-      email: user.email || "",
-      photoURL: user.photoURL || "",
-      goal: goal as "productivity" | "fitness" | "mindfulness" | null,
-      level: level as "beginner" | "intermediate" | "expert" | null,
-      xp: 0,
-      points: 0,
-      streak: 0,
-      currentStreak: 0,
-      longestStreak: 0,
-      health: 80,
-      mana: 60,
-      mood: "😊",
-      premadeQuests: [],
-      activeQuests: [],
-      completedQuests: [],
-      userQuests: [],
-      chainReactions: defaultChainReactions,
-      completedChains: [],
-      redeemedRewards: [],
-      stats: initialStats,
-      streakHistory: initialStreakHistory,
-      createdAt: new Date(),
-      lastActive: new Date(),
-    };
-
-    await setDoc(userRef, {
-      ...newUser,
-      createdAt: serverTimestamp(),
-      lastActive: serverTimestamp(),
-    });
-
-    return newUser;
+  // If user already exists, return early
+  if (userDoc.exists()) {
+    return userDoc.data() as UserProfile;
   }
 
-  // If user exists, return existing data
-  return userDoc.data() as UserProfile;
+  // Only create profile if user doesn't exist
+  const today = new Date();
+  const todayStr = today.toISOString().split("T")[0];
+
+  const initialStats: UserStats = {
+    mindful: 0,
+    productive: 0,
+    fit: 0,
+    discipline: 0,
+    balanced: 0,
+  };
+
+  const initialStreakHistory: DailyStreak[] = [
+    { date: todayStr, completed: false, points: 0 },
+  ];
+
+  const newUser: UserProfile = {
+    uid: user.uid,
+    displayName: user.displayName || "Adventurer",
+    email: user.email || "",
+    photoURL: user.photoURL || "",
+    goal: goal as "productivity" | "fitness" | "mindfulness" | null,
+    level: level as "beginner" | "intermediate" | "expert" | null,
+    xp: 0,
+    points: 0,
+    streak: 0,
+    currentStreak: 0,
+    longestStreak: 0,
+    health: 80,
+    mana: 60,
+    mood: "😊",
+    premadeQuests: [],
+    activeQuests: [],
+    completedQuests: [],
+    userQuests: [],
+    chainReactions: defaultChainReactions,
+    completedChains: [],
+    redeemedRewards: [],
+    stats: initialStats,
+    streakHistory: initialStreakHistory,
+    createdAt: new Date(),
+    lastActive: new Date(),
+  };
+
+  await setDoc(userRef, {
+    ...newUser,
+    createdAt: serverTimestamp(),
+    lastActive: serverTimestamp(),
+  });
+
+  return newUser;
 }
 
 // 2. Get user profile
