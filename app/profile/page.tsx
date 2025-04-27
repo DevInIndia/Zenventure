@@ -3,21 +3,41 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ProfilePage } from "@/components/profile-page";
+import { auth } from "@/lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import { getUserProfile } from "@/lib/firestore";
+import type { UserProfile } from "@/lib/types";
 
 export default function Profile() {
   const [isLoading, setIsLoading] = useState(true);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    // Check if user has completed onboarding
-    const userGoal = localStorage.getItem("userGoal");
-    const userLevel = localStorage.getItem("userLevel");
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          // Get user profile from Firestore
+          const profile = await getUserProfile();
 
-    if (!userGoal || !userLevel) {
-      router.push("/");
-    } else {
-      setIsLoading(false);
-    }
+          if (profile) {
+            setUserProfile(profile);
+            setIsLoading(false);
+          } else {
+            // User doesn't have a profile, redirect to onboarding
+            router.push("/onboarding");
+          }
+        } catch (error) {
+          console.error("Error loading user profile:", error);
+          setIsLoading(false);
+        }
+      } else {
+        // User is not signed in, redirect to auth page
+        router.push("/auth");
+      }
+    });
+
+    return () => unsubscribe();
   }, [router]);
 
   if (isLoading) {
@@ -28,5 +48,5 @@ export default function Profile() {
     );
   }
 
-  return <ProfilePage />;
+  return userProfile ? <ProfilePage userProfile={userProfile} /> : null;
 }

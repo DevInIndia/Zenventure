@@ -11,8 +11,6 @@ export function Sidebar() {
 
   const menuItems = [
     { id: "home", icon: Home, label: "HOME", href: "/dashboard" },
-    // { id: "mind", icon: Brain, label: "MIND", href: "/dashboard/mind" },
-    // { id: "body", icon: Dumbbell, label: "BODY", href: "/dashboard/body" },
     {
       id: "streaks",
       icon: Target,
