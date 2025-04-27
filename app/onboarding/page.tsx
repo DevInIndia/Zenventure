@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Card,
@@ -13,30 +13,46 @@ import {
 import { Button } from "@/components/ui/button";
 import { Briefcase, Dumbbell, Brain } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { AuthCheck } from "@/components/auth-check";
+import { auth } from "@/lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import { createUserProfile } from "@/lib/firestore";
 
 type Goal = "productivity" | "fitness" | "mindfulness" | null;
 type Level = "beginner" | "intermediate" | "expert" | null;
 
 export default function OnboardingPage() {
-  return (
-    <AuthCheck>
-      <OnboardingContent />
-    </AuthCheck>
-  );
-}
-
-function OnboardingContent() {
   const [step, setStep] = useState(1);
   const [selectedGoal, setSelectedGoal] = useState<Goal>(null);
   const [selectedLevel, setSelectedLevel] = useState<Level>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const handleComplete = () => {
-    // In a real app, we would save this data to a database
-    localStorage.setItem("userGoal", selectedGoal || "");
-    localStorage.setItem("userLevel", selectedLevel || "");
-    router.push("/dashboard");
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        // User is not signed in, redirect to auth page
+        router.push("/auth");
+      }
+    });
+
+    return () => unsubscribe();
+  }, [router]);
+
+  const handleComplete = async () => {
+    if (!selectedGoal || !selectedLevel) return;
+
+    setIsLoading(true);
+
+    try {
+      // Create user profile in Firestore
+      await createUserProfile(selectedGoal, selectedLevel);
+
+      // Redirect to quest selection
+      router.push("/quest-selection");
+    } catch (error) {
+      console.error("Error creating user profile:", error);
+      setIsLoading(false);
+    }
   };
 
   const goalOptions = [
@@ -143,10 +159,10 @@ function OnboardingContent() {
                 </Button>
                 <Button
                   className="flex-1 pixel-button bg-[#f9c80e] text-black hover:bg-[#f86624]"
-                  disabled={!selectedLevel}
+                  disabled={!selectedLevel || isLoading}
                   onClick={handleComplete}
                 >
-                  START QUEST
+                  {isLoading ? "CREATING..." : "START QUEST"}
                 </Button>
               </div>
             )}

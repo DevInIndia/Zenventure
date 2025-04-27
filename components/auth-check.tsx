@@ -6,18 +6,31 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { userExists } from "@/lib/firestore";
 
 export function AuthCheck({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
         // User is not signed in, redirect to auth page
         router.push("/auth");
       } else {
-        setIsLoading(false);
+        // Check if user has a profile in Firestore
+        try {
+          const exists = await userExists();
+          if (!exists) {
+            // User is authenticated but doesn't have a profile, redirect to onboarding
+            router.push("/onboarding");
+          } else {
+            setIsLoading(false);
+          }
+        } catch (error) {
+          console.error("Error checking user profile:", error);
+          setIsLoading(false);
+        }
       }
     });
 

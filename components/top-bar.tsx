@@ -72,14 +72,14 @@ export function TopBar({ xp, streak, mood, health, mana }: TopBarProps) {
       <div className="flex items-center space-x-4">
         <div className="flex flex-col space-y-1 w-full">
           <div className="flex items-center">
-            <div className="h-8 w-8 bg-[#f9c80e] flex items-center justify-center text-black border-2 border-black">
+            <div className="h-8 w-12 bg-[#f9c80e] flex items-center justify-center text-black border-2 border-black">
               <span className="text-xs font-medium">LV{level}</span>
             </div>
             <div className="ml-2 text-xs text-[#dbd8e3]">XP: {xp}/100</div>
           </div>
 
           {/* Health Bar */}
-          <div className="flex items-center">
+          {/* <div className="flex items-center">
             <span className="text-xs text-[#f9c80e] mr-2">HP</span>
             <div className="health-bar w-32">
               <div
@@ -88,10 +88,10 @@ export function TopBar({ xp, streak, mood, health, mana }: TopBarProps) {
               ></div>
             </div>
             <span className="text-xs ml-2">{health}/100</span>
-          </div>
+          </div> */}
 
           {/* Mana Bar */}
-          <div className="flex items-center">
+          {/* <div className="flex items-center">
             <span className="text-xs text-[#f9c80e] mr-2">MP</span>
             <div className="mana-bar w-32">
               <div
@@ -100,7 +100,7 @@ export function TopBar({ xp, streak, mood, health, mana }: TopBarProps) {
               ></div>
             </div>
             <span className="text-xs ml-2">{mana}/100</span>
-          </div>
+          </div> */}
         </div>
 
         <Badge
@@ -120,7 +120,7 @@ export function TopBar({ xp, streak, mood, health, mana }: TopBarProps) {
       </div>
 
       <div className="flex items-center space-x-2">
-        <Button
+        {/* <Button
           variant="ghost"
           size="icon"
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
@@ -143,7 +143,7 @@ export function TopBar({ xp, streak, mood, health, mana }: TopBarProps) {
               {notifications}
             </motion.div>
           )}
-        </Button>
+        </Button> */}
 
         {/* <Button
           variant="ghost"
