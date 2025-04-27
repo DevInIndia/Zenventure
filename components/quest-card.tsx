@@ -41,16 +41,19 @@ interface QuestCardProps {
 export function QuestCard({ quest, onComplete, onUpdateTime }: QuestCardProps) {
   const [isCompleting, setIsCompleting] = useState(false);
   const [showXpGain, setShowXpGain] = useState(false);
+  const [showPointsGain, setShowPointsGain] = useState(false);
   const [isTimeDialogOpen, setIsTimeDialogOpen] = useState(false);
   const [newTime, setNewTime] = useState(quest.estimatedTime.toString());
 
   const handleComplete = () => {
     setIsCompleting(true);
     setShowXpGain(true);
+    setShowPointsGain(true);
 
     // Hide XP gain animation after a delay
     setTimeout(() => {
       setShowXpGain(false);
+      setShowPointsGain(false);
       onComplete();
     }, 1500);
   };
@@ -160,12 +163,18 @@ export function QuestCard({ quest, onComplete, onUpdateTime }: QuestCardProps) {
         </CardContent>
 
         <CardFooter className="p-4 pt-0 flex justify-between items-center bg-[#352f44] border-t-4 border-black">
-          <div className="flex items-center">
+          <div className="flex items-center gap-2">
             <Badge
               variant="secondary"
               className="bg-[#f9c80e] text-black border-2 border-black"
             >
               +{quest.xpReward} XP
+            </Badge>
+            <Badge
+              variant="secondary"
+              className="bg-[#43aa8b] text-black border-2 border-black"
+            >
+              +{quest.pointsReward || 0} PTS
             </Badge>
           </div>
 
@@ -184,11 +193,25 @@ export function QuestCard({ quest, onComplete, onUpdateTime }: QuestCardProps) {
           {showXpGain && (
             <motion.div
               initial={{ opacity: 0, y: 0 }}
-              animate={{ opacity: 1, y: -50 }}
+              animate={{ opacity: 1, y: -70 }}
               exit={{ opacity: 0 }}
-              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl font-bold text-[#f9c80e] bg-black/50 px-4 py-2 border-2 border-[#f9c80e]"
+              className="absolute top-1/2 left-1/3 transform -translate-x-1/2 -translate-y-1/2 text-xl font-bold text-[#f9c80e] bg-black/50 px-4 py-2 border-2 border-[#f9c80e]"
             >
               +{quest.xpReward} XP
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Points Gain Animation */}
+        <AnimatePresence>
+          {showPointsGain && (
+            <motion.div
+              initial={{ opacity: 0, y: 0 }}
+              animate={{ opacity: 1, y: -70 }}
+              exit={{ opacity: 0 }}
+              className="absolute top-1/2 left-2/3 transform -translate-x-1/2 -translate-y-1/2 text-xl font-bold text-[#43aa8b] bg-black/50 px-4 py-2 border-2 border-[#43aa8b]"
+            >
+              +{quest.pointsReward || 0} PTS
             </motion.div>
           )}
         </AnimatePresence>

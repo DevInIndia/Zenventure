@@ -7,6 +7,7 @@ import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { getUserProfile } from "@/lib/firestore";
 import type { UserProfile } from "@/lib/types";
+import { LoadingScreen } from "@/components/loading-screen";
 
 export default function Profile() {
   const [isLoading, setIsLoading] = useState(true);
@@ -41,11 +42,7 @@ export default function Profile() {
   }, [router]);
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   return userProfile ? <ProfilePage userProfile={userProfile} /> : null;
