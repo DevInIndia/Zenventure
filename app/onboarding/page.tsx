@@ -112,7 +112,7 @@ export default function OnboardingPage() {
         <Card className="pixel-card bg-[#352f44] text-[#f0ece2] border-[#dbd8e3]">
           <CardHeader className="text-center border-b-4 border-[#5c5470] pb-4">
             <CardTitle className="text-xl text-[#f9c80e] mb-2">
-              LIFEQUEST
+              ZENVENTURES
             </CardTitle>
             <CardDescription className="text-[#f0ece2] text-sm">
               {step === 1 ? "SELECT YOUR CLASS" : "SELECT YOUR LEVEL"}

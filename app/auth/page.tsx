@@ -20,7 +20,7 @@ export default function AuthPage() {
       if (user) {
         // Check if user profile exists in Firestore
         const userDoc = await getDoc(doc(db, "users", user.uid));
-        
+
         if (userDoc.exists()) {
           // User exists, go directly to dashboard
           router.push("/dashboard");
@@ -59,7 +59,7 @@ export default function AuthPage() {
         <Card className="pixel-card bg-[#352f44] text-[#f0ece2] border-[#dbd8e3]">
           <CardHeader className="text-center border-b-4 border-[#5c5470] pb-4">
             <CardTitle className="text-xl text-[#f9c80e] mb-2">
-              LIFEQUEST
+              ZENVENTURES
             </CardTitle>
             <p className="text-[#f0ece2] text-sm">JOIN THE ADVENTURE</p>
           </CardHeader>

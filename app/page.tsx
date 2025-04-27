@@ -21,7 +21,7 @@ export default function LandingPage() {
               transition={{ duration: 0.5 }}
             >
               <h1 className="text-4xl md:text-6xl font-bold text-[#f9c80e] mb-4">
-                LIFEQUEST
+                ZENVENTURES
               </h1>
               <p className="text-xl md:text-2xl text-[#dbd8e3] mb-8">
                 LEVEL UP YOUR LIFE
@@ -111,7 +111,7 @@ export default function LandingPage() {
       <footer className="bg-[#352f44] border-t-4 border-[#5c5470] py-8">
         <div className="container mx-auto px-4 text-center">
           <p className="text-[#dbd8e3]">
-            © 2025 LIFEQUEST - LEVEL UP YOUR LIFE
+            © 2025 ZENVENTURES - LEVEL UP YOUR LIFE
           </p>
         </div>
       </footer>
