@@ -8,101 +8,141 @@ import { TopBar } from "@/components/top-bar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Target, Award, Zap, Star, Calendar, Clock } from "lucide-react";
+import { Target, Zap, Star, Calendar, RefreshCw } from "lucide-react";
 import { Dumbbell } from "lucide-react";
 import { Brain } from "lucide-react";
+import { auth } from "@/lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import {
+  getUserProfile,
+  completeChainActivity,
+  resetChain,
+} from "@/lib/firestore";
+import type { UserProfile, ChainReaction } from "@/lib/types";
+import { LoadingScreen } from "@/components/loading-screen";
 
 export default function StreaksPage() {
   const [isLoading, setIsLoading] = useState(true);
-  const [xp, setXp] = useState(0);
-  const [streak, setStreak] = useState(7);
-  const [mood, setMood] = useState("😊");
-  const [health, setHealth] = useState(80);
-  const [mana, setMana] = useState(60);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [activeChains, setActiveChains] = useState<ChainReaction[]>([]);
+  const [completedChains, setCompletedChains] = useState<ChainReaction[]>([]);
+  const [isUpdating, setIsUpdating] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    // Check if user has completed onboarding
-    const userGoal = localStorage.getItem("userGoal");
-    const userLevel = localStorage.getItem("userLevel");
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          // Get user profile from Firestore
+          const profile = await getUserProfile();
 
-    if (!userGoal || !userLevel) {
-      router.push("/");
-    } else {
-      setIsLoading(false);
-    }
+          if (profile) {
+            setUserProfile(profile);
+            setActiveChains(
+              profile.chainReactions.filter((chain) => chain.isActive)
+            );
+            setCompletedChains(profile.completedChains || []);
+            setIsLoading(false);
+          } else {
+            // User doesn't have a profile, redirect to onboarding
+            router.push("/onboarding");
+          }
+        } catch (error) {
+          console.error("Error loading user profile:", error);
+          setIsLoading(false);
+        }
+      } else {
+        // User is not signed in, redirect to auth page
+        router.push("/auth");
+      }
+    });
+
+    return () => unsubscribe();
   }, [router]);
 
-  // Active streaks
-  const activeStreaks = [
-    {
-      name: "Daily Login",
-      current: 7,
-      target: 30,
-      reward: "50 XP",
-      icon: Calendar,
-    },
-    {
-      name: "Workout Streak",
-      current: 3,
-      target: 7,
-      reward: "Health +10",
-      icon: Dumbbell,
-    },
-    {
-      name: "Meditation",
-      current: 5,
-      target: 10,
-      reward: "Mana +15",
-      icon: Brain,
-    },
-  ];
+  const handleCompleteActivity = async (
+    chainId: string,
+    activityId: string
+  ) => {
+    if (!userProfile || isUpdating) return;
 
-  // Chain reaction rewards (from the bonus tracks image)
-  const chainReactions = [
-    {
-      name: "Morning Victory",
-      activities: [
-        { name: "Wake up 7 AM", points: 3, completed: true },
-        { name: "Exercise", points: 4, completed: false },
-        { name: "Healthy breakfast", points: 3, completed: false },
-      ],
-      bonus: 3,
-      totalPoints: 13,
-    },
-    {
-      name: "Evening Wind Down",
-      activities: [
-        { name: "No screens after 9 PM", points: 2, completed: true },
-        { name: "Read for 20 minutes", points: 3, completed: true },
-        { name: "Meditate before sleep", points: 4, completed: false },
-      ],
-      bonus: 3,
-      totalPoints: 12,
-    },
-    {
-      name: "Productivity Boost",
-      activities: [
-        { name: "Plan your day", points: 2, completed: true },
-        { name: "Deep work session", points: 5, completed: false },
-        { name: "Review accomplishments", points: 2, completed: false },
-      ],
-      bonus: 3,
-      totalPoints: 12,
-    },
-  ];
+    setIsUpdating(true);
+
+    try {
+      const result = await completeChainActivity(chainId, activityId);
+
+      // Update local state
+      const updatedChains = activeChains.map((chain) => {
+        if (chain.id === chainId) {
+          return result.chain;
+        }
+        return chain;
+      });
+
+      // If chain is completed, remove from active chains
+      const newActiveChains = result.allCompleted
+        ? updatedChains.filter((chain) => chain.id !== chainId)
+        : updatedChains;
+
+      setActiveChains(newActiveChains);
+
+      // If chain is completed, add to completed chains
+      if (result.allCompleted) {
+        setCompletedChains([...completedChains, result.chain]);
+      }
+
+      // Update user profile points
+      setUserProfile({
+        ...userProfile,
+        points: userProfile.points + result.totalPoints,
+      });
+    } catch (error) {
+      console.error("Error completing activity:", error);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleResetChain = async (chainId: string) => {
+    if (!userProfile || isUpdating) return;
+
+    setIsUpdating(true);
+
+    try {
+      const resetedChain = await resetChain(chainId);
+
+      // Update local state
+      const updatedChains = activeChains.map((chain) => {
+        if (chain.id === chainId) {
+          return resetedChain;
+        }
+        return chain;
+      });
+
+      setActiveChains(updatedChains);
+    } catch (error) {
+      console.error("Error resetting chain:", error);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   return (
     <div className="min-h-screen flex flex-col bg-[#222034] text-[#f0ece2]">
-      <TopBar xp={xp} streak={streak} mood={mood} health={health} mana={mana} />
+      {userProfile && (
+        <TopBar
+          xp={userProfile.xp}
+          points={userProfile.points}
+          streak={userProfile.currentStreak}
+          mood={userProfile.mood}
+          health={userProfile.health}
+          mana={userProfile.mana}
+        />
+      )}
 
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
@@ -128,27 +168,24 @@ export default function StreaksPage() {
                 </CardHeader>
                 <CardContent className="p-6">
                   <div className="space-y-4">
-                    {activeStreaks.map((streak, index) => (
-                      <div
-                        key={index}
-                        className="p-4 border-2 border-[#5c5470] bg-[#352f44]"
-                      >
+                    {userProfile && (
+                      <div className="p-4 border-2 border-[#5c5470] bg-[#352f44]">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center">
                             <div className="p-2 bg-[#5c5470] text-[#dbd8e3] mr-4">
-                              <streak.icon className="h-5 w-5" />
+                              <Calendar className="h-5 w-5" />
                             </div>
                             <div>
                               <h3 className="font-medium text-sm">
-                                {streak.name}
+                                Daily Login
                               </h3>
                               <div className="flex items-center mt-1">
                                 <div className="flex space-x-1">
-                                  {[...Array(streak.target)].map((_, i) => (
+                                  {[...Array(30)].map((_, i) => (
                                     <div
                                       key={i}
                                       className={`w-2 h-2 ${
-                                        i < streak.current
+                                        i < userProfile.currentStreak
                                           ? "bg-[#f9c80e]"
                                           : "bg-[#5c5470]"
                                       } border border-black`}
@@ -156,17 +193,95 @@ export default function StreaksPage() {
                                   ))}
                                 </div>
                                 <span className="text-xs text-[#dbd8e3] ml-2">
-                                  {streak.current}/{streak.target} days
+                                  {userProfile.currentStreak}/30 days
                                 </span>
                               </div>
                             </div>
                           </div>
                           <Badge className="bg-[#f9c80e] text-black">
-                            {streak.reward}
+                            +{userProfile.currentStreak * 5} XP
                           </Badge>
                         </div>
                       </div>
-                    ))}
+                    )}
+
+                    {userProfile && userProfile.currentStreak >= 7 && (
+                      <div className="p-4 border-2 border-[#5c5470] bg-[#352f44]">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <div className="p-2 bg-[#5c5470] text-[#dbd8e3] mr-4">
+                              <Dumbbell className="h-5 w-5" />
+                            </div>
+                            <div>
+                              <h3 className="font-medium text-sm">
+                                Workout Streak
+                              </h3>
+                              <div className="flex items-center mt-1">
+                                <div className="flex space-x-1">
+                                  {[...Array(7)].map((_, i) => (
+                                    <div
+                                      key={i}
+                                      className={`w-2 h-2 ${
+                                        i <
+                                        Math.min(userProfile.currentStreak, 7)
+                                          ? "bg-[#f86624]"
+                                          : "bg-[#5c5470]"
+                                      } border border-black`}
+                                    />
+                                  ))}
+                                </div>
+                                <span className="text-xs text-[#dbd8e3] ml-2">
+                                  {Math.min(userProfile.currentStreak, 7)}/7
+                                  days
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <Badge className="bg-[#f86624] text-black">
+                            Health +10
+                          </Badge>
+                        </div>
+                      </div>
+                    )}
+
+                    {userProfile && userProfile.currentStreak >= 5 && (
+                      <div className="p-4 border-2 border-[#5c5470] bg-[#352f44]">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <div className="p-2 bg-[#5c5470] text-[#dbd8e3] mr-4">
+                              <Brain className="h-5 w-5" />
+                            </div>
+                            <div>
+                              <h3 className="font-medium text-sm">
+                                Meditation
+                              </h3>
+                              <div className="flex items-center mt-1">
+                                <div className="flex space-x-1">
+                                  {[...Array(10)].map((_, i) => (
+                                    <div
+                                      key={i}
+                                      className={`w-2 h-2 ${
+                                        i <
+                                        Math.min(userProfile.currentStreak, 10)
+                                          ? "bg-[#43aa8b]"
+                                          : "bg-[#5c5470]"
+                                      } border border-black`}
+                                    />
+                                  ))}
+                                </div>
+                                <span className="text-xs text-[#dbd8e3] ml-2">
+                                  {Math.min(userProfile.currentStreak, 10)}/10
+                                  days
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <Badge className="bg-[#43aa8b] text-black">
+                            Mana +15
+                          </Badge>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -181,23 +296,40 @@ export default function StreaksPage() {
                 </CardHeader>
                 <CardContent className="p-6">
                   <div className="space-y-6">
-                    {chainReactions.map((chain, index) => (
+                    {activeChains.map((chain) => (
                       <div
-                        key={index}
+                        key={chain.id}
                         className="p-4 border-2 border-[#5c5470] bg-[#352f44]"
                       >
-                        <h3 className="font-medium text-sm text-[#f9c80e] mb-3 flex items-center">
-                          <Star className="h-4 w-4 mr-2" />
-                          {chain.name}
-                          <Badge className="ml-auto bg-[#f9c80e] text-black">
-                            {chain.totalPoints} POINTS
-                          </Badge>
+                        <h3 className="font-medium text-sm text-[#f9c80e] mb-3 flex items-center justify-between">
+                          <div className="flex items-center">
+                            <Star className="h-4 w-4 mr-2" />
+                            {chain.name}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge className="bg-[#f9c80e] text-black">
+                              {chain.activities.reduce(
+                                (sum, act) => sum + act.points,
+                                0
+                              ) + chain.bonusPoints}{" "}
+                              POINTS
+                            </Badge>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 rounded-full"
+                              onClick={() => handleResetChain(chain.id)}
+                              disabled={isUpdating}
+                            >
+                              <RefreshCw className="h-3 w-3 text-[#dbd8e3]" />
+                            </Button>
+                          </div>
                         </h3>
 
                         <div className="space-y-2 mb-3">
-                          {chain.activities.map((activity, actIndex) => (
+                          {chain.activities.map((activity) => (
                             <div
-                              key={actIndex}
+                              key={activity.id}
                               className="flex items-center justify-between"
                             >
                               <div className="flex items-center">
@@ -206,7 +338,14 @@ export default function StreaksPage() {
                                     activity.completed
                                       ? "bg-[#43aa8b]"
                                       : "bg-[#5c5470]"
-                                  } flex items-center justify-center text-xs border border-black`}
+                                  } flex items-center justify-center text-xs border border-black cursor-pointer`}
+                                  onClick={() =>
+                                    !activity.completed &&
+                                    handleCompleteActivity(
+                                      chain.id,
+                                      activity.id
+                                    )
+                                  }
                                 >
                                   {activity.completed ? "✓" : ""}
                                 </div>
@@ -232,18 +371,73 @@ export default function StreaksPage() {
                             Chain completion bonus
                           </span>
                           <span className="text-xs text-[#43aa8b]">
-                            +{chain.bonus} pts
+                            +{chain.bonusPoints} pts
                           </span>
                         </div>
 
                         <Button
                           className="w-full mt-3 pixel-button bg-[#43aa8b] text-black hover:bg-[#3a9579]"
-                          disabled={!chain.activities.some((a) => !a.completed)}
+                          disabled={
+                            chain.activities.every((a) => a.completed) ||
+                            isUpdating
+                          }
+                          onClick={() => {
+                            const nextIncomplete = chain.activities.find(
+                              (a) => !a.completed
+                            );
+                            if (nextIncomplete) {
+                              handleCompleteActivity(
+                                chain.id,
+                                nextIncomplete.id
+                              );
+                            }
+                          }}
                         >
-                          CONTINUE CHAIN
+                          {isUpdating ? "UPDATING..." : "CONTINUE CHAIN"}
                         </Button>
                       </div>
                     ))}
+
+                    {activeChains.length === 0 && (
+                      <div className="text-center p-6">
+                        <p className="text-[#dbd8e3] mb-4">
+                          All chains completed! Check back tomorrow for new
+                          chains.
+                        </p>
+                        <div className="text-4xl">🎉</div>
+                      </div>
+                    )}
+
+                    {completedChains.length > 0 && (
+                      <div className="mt-6">
+                        <h3 className="font-medium text-sm text-[#f9c80e] mb-3">
+                          Completed Chains
+                        </h3>
+                        <div className="space-y-2">
+                          {completedChains.slice(0, 3).map((chain) => (
+                            <div
+                              key={chain.id}
+                              className="p-3 border border-[#43aa8b] bg-[#352f44]/50"
+                            >
+                              <div className="flex justify-between items-center">
+                                <div className="flex items-center">
+                                  <Star className="h-3 w-3 mr-2 text-[#43aa8b]" />
+                                  <span className="text-xs">{chain.name}</span>
+                                </div>
+                                <Badge className="bg-[#43aa8b] text-black text-xs">
+                                  +
+                                  {chain.activities.reduce(
+                                    (sum, act) => sum + act.points,
+                                    0
+                                  ) + chain.bonusPoints}{" "}
+                                  pts
+                                </Badge>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>

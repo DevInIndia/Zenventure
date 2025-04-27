@@ -6,7 +6,7 @@ import { Sidebar } from "@/components/sidebar";
 import { TopBar } from "@/components/top-bar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { XPGraph } from "@/components/xp-graph";
+import { RadarChart } from "@/components/radar-chart";
 import { StreakCalendar } from "@/components/streak-calendar";
 import Image from "next/image";
 import type { UserProfile } from "@/lib/types";
@@ -17,7 +17,7 @@ interface ProfilePageProps {
 
 export function ProfilePage({ userProfile }: ProfilePageProps) {
   const [xp, setXp] = useState(userProfile.xp);
-  const [streak, setStreak] = useState(userProfile.streak);
+  const [streak, setStreak] = useState(userProfile.currentStreak);
   const [mood, setMood] = useState(userProfile.mood);
   const [health, setHealth] = useState(userProfile.health);
   const [mana, setMana] = useState(userProfile.mana);
@@ -35,7 +35,14 @@ export function ProfilePage({ userProfile }: ProfilePageProps) {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#222034] text-[#f0ece2]">
-      <TopBar xp={xp} streak={streak} mood={mood} health={health} mana={mana} />
+      <TopBar
+        xp={xp}
+        points={userProfile.points}
+        streak={streak}
+        mood={mood}
+        health={health}
+        mana={mana}
+      />
 
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
@@ -99,6 +106,40 @@ export function ProfilePage({ userProfile }: ProfilePageProps) {
                         XP: {xp % 100}/100
                       </p>
                     </div>
+                    <div className="w-full mt-2">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-xs text-[#dbd8e3]">
+                          Current Streak
+                        </span>
+                        <span className="text-xs text-[#f9c80e]">
+                          {userProfile.currentStreak} days
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-xs text-[#dbd8e3]">
+                          Longest Streak
+                        </span>
+                        <span className="text-xs text-[#f9c80e]">
+                          {userProfile.longestStreak} days
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-xs text-[#dbd8e3]">
+                          Total Points
+                        </span>
+                        <span className="text-xs text-[#f9c80e]">
+                          {userProfile.points} points
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-[#dbd8e3]">
+                          Completed Quests
+                        </span>
+                        <span className="text-xs text-[#f9c80e]">
+                          {userProfile.completedQuests.length}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -125,11 +166,11 @@ export function ProfilePage({ userProfile }: ProfilePageProps) {
                     <Card className="pixel-card bg-[#352f44] border-4 border-black">
                       <CardHeader className="border-b-4 border-[#5c5470] pb-4">
                         <CardTitle className="text-[#f9c80e]">
-                          XP PROGRESS
+                          CHARACTER STATS
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="p-6">
-                        <XPGraph />
+                        <RadarChart stats={userProfile.stats} />
                       </CardContent>
                     </Card>
                   </TabsContent>
@@ -142,7 +183,9 @@ export function ProfilePage({ userProfile }: ProfilePageProps) {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="p-6">
-                        <StreakCalendar />
+                        <StreakCalendar
+                          streakHistory={userProfile.streakHistory}
+                        />
                       </CardContent>
                     </Card>
                   </TabsContent>

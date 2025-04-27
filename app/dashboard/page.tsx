@@ -19,6 +19,7 @@ import {
   createCustomQuest,
 } from "@/lib/firestore";
 import type { Quest } from "@/lib/types";
+import { LoadingScreen } from "@/components/loading-screen";
 
 export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -27,6 +28,7 @@ export default function DashboardPage() {
   const [completedQuests, setCompletedQuests] = useState<Quest[]>([]);
   const [availableQuests, setAvailableQuests] = useState<Quest[]>([]);
   const [xp, setXp] = useState(0);
+  const [points, setPoints] = useState(0);
   const [streak, setStreak] = useState(0);
   const [mood, setMood] = useState("😊");
   const [health, setHealth] = useState(80);
@@ -46,6 +48,7 @@ export default function DashboardPage() {
             setActiveQuests(userProfile.activeQuests || []);
             setCompletedQuests(userProfile.completedQuests || []);
             setXp(userProfile.xp || 0);
+            setPoints(userProfile.points || 0);
             setStreak(userProfile.streak || 0);
             setMood(userProfile.mood || "😊");
             setHealth(userProfile.health || 80);
@@ -140,16 +143,19 @@ export default function DashboardPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#222034]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#f9c80e]"></div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   return (
     <div className="min-h-screen flex flex-col bg-[#222034] text-[#f0ece2]">
-      <TopBar xp={xp} streak={streak} mood={mood} health={health} mana={mana} />
+      <TopBar
+        xp={xp}
+        streak={streak}
+        points={points}
+        mood={mood}
+        health={health}
+        mana={mana}
+      />
 
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />

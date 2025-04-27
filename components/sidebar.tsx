@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Home, Brain, Dumbbell, Target, ScrollText } from "lucide-react";
+import { Home, Target, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function Sidebar() {
@@ -17,6 +17,7 @@ export function Sidebar() {
       label: "STREAKS",
       href: "/dashboard/streaks",
     },
+    { id: "/rewards", icon: Gift, label: "REWARDS", href: "/rewards" },
   ];
 
   const getActiveItemId = () => {
@@ -99,7 +100,7 @@ export function Sidebar() {
                   transition={{ duration: 0.2 }}
                 />
               )}
-              <div className="h-8 w-8 bg-[#f9c80e] flex items-center justify-center text-black mr-2 border-2 border-black">
+              <div className="h-8 w-12 bg-[#f9c80e] flex items-center justify-center text-black mr-2 border-2 border-black">
                 <span className="text-xs font-medium">LV1</span>
               </div>
               <span className="hidden md:inline-block text-xs">CHARACTER</span>

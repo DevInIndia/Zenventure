@@ -20,12 +20,20 @@ import {
 interface TopBarProps {
   xp: number;
   streak: number;
+  points?: number;
   mood: string;
   health: number;
   mana: number;
 }
 
-export function TopBar({ xp, streak, mood, health, mana }: TopBarProps) {
+export function TopBar({
+  xp,
+  points = 0,
+  streak,
+  mood,
+  health,
+  mana,
+}: TopBarProps) {
   const { theme, setTheme } = useTheme();
   const [notifications, setNotifications] = useState(2);
   const router = useRouter();
@@ -116,6 +124,14 @@ export function TopBar({ xp, streak, mood, health, mana }: TopBarProps) {
           className="flex items-center gap-1 px-2 py-1 border-2 border-[#43aa8b] bg-[#5c5470] text-[#43aa8b]"
         >
           <span>{mood}</span>
+        </Badge>
+
+        <Badge
+          variant="outline"
+          className="flex items-center gap-1 px-2 py-1 border-2 border-[#f9c80e] bg-[#5c5470] text-[#f9c80e]"
+        >
+          <span className="text-xs">💰</span>
+          <span className="text-xs font-medium">{points} POINTS</span>
         </Badge>
       </div>
 
