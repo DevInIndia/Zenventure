@@ -15,26 +15,30 @@ import { mockRewards } from "./mock-rewards";
 import { defaultChainReactions } from "./chain-reactions";
 
 // Helper to get current user ID
-function getUserId() {
+// function getUserId() {
+//   const user = auth.currentUser;
+//   if (!user) throw new Error("No user is logged in.");
+//   return user.uid;
+// }
+// Helper to get current user EMAIL instead of UID
+function getUserEmail() {
   const user = auth.currentUser;
-  if (!user) throw new Error("No user is logged in.");
-  return user.uid;
+  if (!user || !user.email) throw new Error("No user is logged in or missing email.");
+  return user.email;
 }
 
 // 1. Create a new user profile
 export async function createUserProfile(goal: string, level: string) {
   const user = auth.currentUser;
-  if (!user) throw new Error("No user is logged in.");
+  if (!user || !user.email) throw new Error("No user is logged in or email missing.");
 
-  const userRef = doc(db, "users", user.uid);
+  const userRef = doc(db, "users", user.email);
   const userDoc = await getDoc(userRef);
 
-  // If user already exists, return early
   if (userDoc.exists()) {
     return userDoc.data() as UserProfile;
   }
 
-  // Only create profile if user doesn't exist
   const today = new Date();
   const todayStr = today.toISOString().split("T")[0];
 
@@ -53,7 +57,7 @@ export async function createUserProfile(goal: string, level: string) {
   const newUser: UserProfile = {
     uid: user.uid,
     displayName: user.displayName || "Adventurer",
-    email: user.email || "",
+    email: user.email,
     photoURL: user.photoURL || "",
     goal: goal as "productivity" | "fitness" | "mindfulness" | null,
     level: level as "beginner" | "intermediate" | "expert" | null,
@@ -90,16 +94,12 @@ export async function createUserProfile(goal: string, level: string) {
 // 2. Get user profile
 export async function getUserProfile() {
   try {
-    const uid = getUserId();
-    const userRef = doc(db, "users", uid);
+    const email = getUserEmail();
+    const userRef = doc(db, "users", email);
     const userDoc = await getDoc(userRef);
 
     if (userDoc.exists()) {
-      // Update last active timestamp
-      await updateDoc(userRef, {
-        lastActive: serverTimestamp(),
-      });
-
+      await updateDoc(userRef, { lastActive: serverTimestamp() });
       return userDoc.data() as UserProfile;
     }
     return null;
@@ -112,8 +112,8 @@ export async function getUserProfile() {
 // 3. Check if user exists
 export async function userExists() {
   try {
-    const uid = getUserId();
-    const userRef = doc(db, "users", uid);
+    const email = getUserEmail();
+    const userRef = doc(db, "users", email);
     const userDoc = await getDoc(userRef);
     return userDoc.exists();
   } catch (error) {
@@ -123,8 +123,8 @@ export async function userExists() {
 
 // 4. Add premade quests for user
 export async function addPremadeQuests(quests: Quest[]) {
-  const uid = getUserId();
-  const userRef = doc(db, "users", uid);
+  const email = getUserEmail();
+  const userRef = doc(db, "users", email);
 
   // Add points reward to each quest
   const questsWithPoints = quests.map((quest) => ({
@@ -190,8 +190,8 @@ export async function getAvailableQuests() {
 
 // 6. Add a quest to active quests
 export async function addActiveQuest(quest: Quest) {
-  const uid = getUserId();
-  const userRef = doc(db, "users", uid);
+  const email = getUserEmail();
+  const userRef = doc(db, "users", email);
 
   // Ensure quest has points reward
   const questWithPoints = {
@@ -216,8 +216,8 @@ export async function addActiveQuest(quest: Quest) {
 
 // 7. Complete a quest
 export async function completeQuest(quest: Quest) {
-  const uid = getUserId();
-  const userRef = doc(db, "users", uid);
+  const email = getUserEmail();
+  const userRef = doc(db, "users", email);
   const userDoc = await getDoc(userRef);
 
   if (!userDoc.exists()) {
@@ -371,8 +371,8 @@ export async function completeQuest(quest: Quest) {
 
 // 8. Update quest time
 export async function updateQuestTime(questId: string, newTime: number) {
-  const uid = getUserId();
-  const userRef = doc(db, "users", uid);
+  const email = getUserEmail();
+  const userRef = doc(db, "users", email);
   const userDoc = await getDoc(userRef);
 
   if (!userDoc.exists()) {
@@ -411,8 +411,8 @@ export async function updateQuestTime(questId: string, newTime: number) {
 export async function createCustomQuest(
   questData: Omit<Quest, "id" | "createdBy" | "createdAt" | "pointsReward">
 ) {
-  const uid = getUserId();
-  const userRef = doc(db, "users", uid);
+  const email = getUserEmail();
+  const userRef = doc(db, "users", email);
 
   // Create a new quest with a unique ID
   const newQuest: Quest = {
@@ -437,8 +437,8 @@ export async function completeChainActivity(
   chainId: string,
   activityId: string
 ) {
-  const uid = getUserId();
-  const userRef = doc(db, "users", uid);
+  const email = getUserEmail();
+  const userRef = doc(db, "users", email);
   const userDoc = await getDoc(userRef);
 
   if (!userDoc.exists()) {
@@ -509,8 +509,8 @@ export async function completeChainActivity(
 
 // 11. Reset a chain
 export async function resetChain(chainId: string) {
-  const uid = getUserId();
-  const userRef = doc(db, "users", uid);
+  const email = getUserEmail();
+  const userRef = doc(db, "users", email);
   const userDoc = await getDoc(userRef);
 
   if (!userDoc.exists()) {
@@ -571,8 +571,8 @@ export async function getAvailableRewards() {
 
 // 13. Redeem a reward
 export async function redeemReward(rewardId: string) {
-  const uid = getUserId();
-  const userRef = doc(db, "users", uid);
+  const email = getUserEmail();
+  const userRef = doc(db, "users", email);
   const userDoc = await getDoc(userRef);
 
   if (!userDoc.exists()) {
@@ -609,8 +609,8 @@ export async function redeemReward(rewardId: string) {
 
 // 14. Update user goal and level
 export async function updateUserGoalAndLevel(goal: string, level: string) {
-  const uid = getUserId();
-  const userRef = doc(db, "users", uid);
+  const email = getUserEmail();
+  const userRef = doc(db, "users", email);
 
   await updateDoc(userRef, {
     goal: goal,
@@ -621,8 +621,8 @@ export async function updateUserGoalAndLevel(goal: string, level: string) {
 
 // 15. Update user streak
 export async function updateUserStreak(streak: number) {
-  const uid = getUserId();
-  const userRef = doc(db, "users", uid);
+  const email = getUserEmail();
+  const userRef = doc(db, "users", email);
 
   await updateDoc(userRef, {
     streak: streak,
@@ -634,8 +634,8 @@ export async function updateUserStreak(streak: number) {
 
 // 16. Update user mood
 export async function updateUserMood(mood: string) {
-  const uid = getUserId();
-  const userRef = doc(db, "users", uid);
+  const email = getUserEmail();
+  const userRef = doc(db, "users", email);
 
   await updateDoc(userRef, {
     mood: mood,
