@@ -112,63 +112,63 @@ export function QuestCard({ quest, onComplete, onUpdateTime }: QuestCardProps) {
     <>
       <Card className="quest-scroll pixel-card overflow-hidden border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
         <CardContent className={`p-4 pt-6 relative ${getCategoryBg()}`}>
-          {/* Category Icon */}
-          <div className="absolute top-0 left-4 -translate-y-1/2 p-2 bg-[#352f44] border-4 border-black">
-            {getCategoryIcon()}
+          {/* Top Row: Icon + Actions */}
+          <div className="flex justify-between items-start mb-4">
+            {/* Category Icon */}
+            <div className="p-2 bg-[#352f44] border-4 border-black">
+              {getCategoryIcon()}
+            </div>
+
+            {/* Actions: Difficulty + More Options */}
+            <div className="flex items-center gap-2">
+              {/* Difficulty Badge */}
+              <Badge
+                variant="outline"
+                className={`capitalize pixel-badge ${getDifficultyColor()}`}
+              >
+                {quest.difficulty}
+              </Badge>
+
+              {/* More Options Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 bg-[#352f44] border border-[#5c5470] hover:bg-[#5c5470] p-1"
+                  >
+                    <MoreVertical className="h-4 w-4 text-[#dbd8e3]" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="bg-[#352f44] border-2 border-[#5c5470] text-[#dbd8e3]"
+                >
+                  <DropdownMenuItem
+                    onClick={() => setIsTimeDialogOpen(true)}
+                    className="cursor-pointer"
+                  >
+                    <Edit className="mr-2 h-4 w-4" />
+                    <span>Edit Time</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
 
-          {/* Difficulty Badge */}
-          <Badge
-            variant="outline"
-            className={`absolute top-4 right-4 capitalize pixel-badge ${getDifficultyColor()}`}
-          >
-            {quest.difficulty}
-          </Badge>
-
-          {/* More Options Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute top-4 right-20 h-6 w-6 bg-[#352f44] border border-[#5c5470] hover:bg-[#5c5470]"
-              >
-                <MoreVertical className="h-4 w-4 text-[#dbd8e3]" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="bg-[#352f44] border-2 border-[#5c5470] text-[#dbd8e3]"
-            >
-              <DropdownMenuItem
-                onClick={() => setIsTimeDialogOpen(true)}
-                className="cursor-pointer"
-              >
-                <Edit className="mr-2 h-4 w-4" />
-                <span>Edit Time</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <div className="mt-2">
-            <h3 className="font-semibold text-sm mb-2 text-[#f9c80e]">
-              {quest.title}
-            </h3>
+          {/* Quest Content */}
+          <div>
+            <h3 className="font-semibold text-sm mb-2 text-[#f9c80e]">{quest.title}</h3>
             <p className="text-xs text-[#dbd8e3] mb-4">{quest.description}</p>
 
-            {/* <div className="flex items-center text-xs text-[#dbd8e3]">
-              <Clock className="h-4 w-4 mr-1 pixel-icon" />
-              <span>{quest.estimatedTime} min</span>
-            </div> */}
             <div className="flex items-center text-xs text-[#dbd8e3]">
               <Clock className="h-4 w-4 mr-1 pixel-icon" />
               <span>{quest.estimatedTime} min</span>
-              <span className="ml-2 text-[#f9c80e]">
-                (Points: {calculatePointsReward({ ...quest, estimatedTime: quest.estimatedTime })})
-              </span>
+              
             </div>
           </div>
         </CardContent>
+
 
         <CardFooter className="p-4 pt-0 flex justify-between items-center bg-[#352f44] border-t-4 border-black">
           <div className="flex items-center gap-2">
@@ -182,7 +182,8 @@ export function QuestCard({ quest, onComplete, onUpdateTime }: QuestCardProps) {
               variant="secondary"
               className="bg-[#43aa8b] text-black border-2 border-black"
             >
-              +{quest.pointsReward || 0} PTS
+              +{calculatePointsReward({ ...quest, estimatedTime: quest.estimatedTime })} PTS
+
             </Badge>
           </div>
 

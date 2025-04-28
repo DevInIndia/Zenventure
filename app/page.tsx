@@ -1,13 +1,25 @@
 "use client";
 
-import type React from "react";
-
+import React, { useState, useEffect } from "react";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { ChevronRight, Award, Zap, Target, Users } from "lucide-react";
 
 export default function LandingPage() {
+  const [currentImage, setCurrentImage] = useState(0);
+  const images = ["/preview1.png", "/preview2.png", "/preview3.png"]; // Paths to your images
+
+  // Change the current image every 3 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImage((prev) => (prev + 1) % images.length); // Cycle through images
+    }, 3000);
+
+    return () => clearInterval(interval); // Clean up interval on component unmount
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#222034] text-white">
       {/* Hero Section */}
@@ -42,7 +54,7 @@ export default function LandingPage() {
             </motion.div>
           </div>
 
-          {/* Game Preview */}
+          {/* Game Preview (Slideshow) */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -50,10 +62,20 @@ export default function LandingPage() {
             className="max-w-4xl mx-auto bg-[#352f44] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4"
           >
             <div className="aspect-video bg-[#222034] border-2 border-[#5c5470] flex items-center justify-center">
-              <div className="text-center">
-                <div className="text-6xl mb-4">🎮</div>
-                <p className="text-[#f9c80e]">GAME PREVIEW</p>
-              </div>
+              <motion.div
+                className="text-center"
+                key={currentImage} // Key helps with smooth transitions
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1 }}
+              >
+                <img
+                  src={images[currentImage]}
+                  alt="Game Preview"
+                  className="w-full h-full object-cover rounded-md"
+                />
+              </motion.div>
             </div>
           </motion.div>
         </div>
@@ -125,7 +147,7 @@ function FeatureCard({
   description,
   delay,
 }: {
-  icon: React.ReactNode;
+  icon: ReactNode;
   title: string;
   description: string;
   delay: number;
