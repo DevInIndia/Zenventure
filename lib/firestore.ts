@@ -141,29 +141,40 @@ export async function addPremadeQuests(quests: Quest[]) {
 }
 
 // Helper function to calculate points reward based on quest properties
-function calculatePointsReward(quest: Quest): number {
+export function calculatePointsReward(quest: Quest): number {
+  // Convert minutes to hours (minimum 15 minutes = 0.25 hours)
+  const hoursSpent = Math.max(quest.estimatedTime / 60, 0.25);
+  // Cap at 4 hours max as per requirements
+  const effectiveHours = Math.min(hoursSpent, 4); 
+
   // Base points based on difficulty
   let basePoints = 0;
   switch (quest.difficulty) {
     case "easy":
-      basePoints = 3;
+      basePoints = 3 * effectiveHours; // Linear scaling for easy
       break;
     case "medium":
-      basePoints = 5;
+      basePoints = 5 * effectiveHours; // Linear scaling for medium
       break;
     case "hard":
-      basePoints = 8;
+      basePoints = 8 * effectiveHours; // Linear scaling for hard
       break;
-    default:
-      basePoints = 3;
   }
 
-  // Adjust based on estimated time (more time = more points, but with diminishing returns)
-  const timeMultiplier =
-    quest.estimatedTime > 0 ? Math.min(1 + quest.estimatedTime / 60, 2) : 1;
+  // Goal Gradient - Progressive bonuses
+  let gradientBonus = 0;
+  if (effectiveHours >= 1) gradientBonus += 4;  // Hour 1 bonus
+  if (effectiveHours >= 2) gradientBonus += 5;  // Hour 2 bonus
+  if (effectiveHours >= 3) gradientBonus += 7;  // Hour 3 bonus
+  if (effectiveHours >= 4) gradientBonus += 10; // Hour 4 bonus + daily bonus
 
-  // Calculate final points
-  return Math.round(basePoints * timeMultiplier);
+  // Category multiplier
+  let categoryMultiplier = 1;
+  if (quest.category === "fitness") categoryMultiplier = 1.2;
+  if (quest.category === "mindfulness") categoryMultiplier = 1.1;
+
+  // Final calculation
+  return Math.round((basePoints + gradientBonus) * categoryMultiplier);
 }
 
 // 5. Get available quests (quests not in user's premade or active quests)
@@ -252,22 +263,27 @@ export async function completeQuest(quest: Quest) {
     stats.fit += quest.xpReward;
   }
 
-  // Check if stats are balanced
-  const totalStats = stats.mindful + stats.productive + stats.fit;
-  if (totalStats > 0) {
-    const mindfulPercent = stats.mindful / totalStats;
-    const productivePercent = stats.productive / totalStats;
-    const fitPercent = stats.fit / totalStats;
+// Check if stats are balanced
+const totalStats = stats.mindful + stats.productive + stats.fit;
+if (totalStats > 0) {
+  const mindfulPercent = stats.mindful / totalStats;
+  const productivePercent = stats.productive / totalStats;
+  const fitPercent = stats.fit / totalStats;
 
-    // If all categories are at least 25% of the total, increase balanced stat
-    if (
-      mindfulPercent >= 0.25 &&
-      productivePercent >= 0.25 &&
-      fitPercent >= 0.25
-    ) {
-      stats.balanced += 5;
-    }
-  }
+  // Calculate the differences between each pair
+  const diffMindfulProductive = Math.abs(mindfulPercent - productivePercent);
+  const diffMindfulFit = Math.abs(mindfulPercent - fitPercent);
+  const diffProductiveFit = Math.abs(productivePercent - fitPercent);
+
+  // Average the differences
+  const avgDifference = (diffMindfulProductive + diffMindfulFit + diffProductiveFit) / 3;
+
+  // Lower avgDifference means stats are closer -> more balanced points
+  const balanceBonus = Math.max(0, Math.round((1 - avgDifference) * 10)); // Scale to 0-10 points
+
+  stats.balanced += balanceBonus;
+}
+
 
   // Update streak
   const today = new Date();

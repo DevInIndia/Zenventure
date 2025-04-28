@@ -11,6 +11,7 @@ import {
   Legend,
 } from "chart.js";
 import type { UserStats } from "@/lib/types";
+import { log } from "console";
 
 Chart.register(
   RadarController,
@@ -40,16 +41,39 @@ export function RadarChart({ stats }: RadarChartProps) {
 
   useEffect(() => {
     if (!chartRef.current) return;
-
+  
     // Destroy existing chart
     if (chartInstance.current) {
       chartInstance.current.destroy();
     }
-
+  
     const ctx = chartRef.current.getContext("2d");
     if (!ctx) return;
 
-    // Create new chart
+    let calculatedDiscipline = 0;
+    let calculatedBalanced = 0;
+  
+    const totalStats = stats.mindful + stats.productive + stats.fit;
+  
+    if (totalStats > 0) {
+      const mindfulPercent = stats.mindful / totalStats;
+      const productivePercent = stats.productive / totalStats;
+      const fitPercent = stats.fit / totalStats;
+  
+      const diffMindfulProductive = Math.abs(mindfulPercent - productivePercent);
+      const diffMindfulFit = Math.abs(mindfulPercent - fitPercent);
+      const diffProductiveFit = Math.abs(productivePercent - fitPercent);
+  
+      const avgDifference = (diffMindfulProductive + diffMindfulFit + diffProductiveFit) / 3;
+  
+      const balanceBonus = Math.max(0, Math.round((1 - avgDifference) * 10)); // 0-10 points
+      calculatedBalanced = balanceBonus;
+    }
+  
+    // Assuming you have a 'currentStreak' available (⚡ temporary fallback)
+    const currentStreak = 1; // you might want to pass this properly later
+    calculatedDiscipline = Math.min(100, currentStreak * 5);
+
     chartInstance.current = new Chart(ctx, {
       type: "radar",
       data: {
@@ -57,15 +81,13 @@ export function RadarChart({ stats }: RadarChartProps) {
         datasets: [
           {
             label: "Your Stats",
-            // 
             data: [
               stats.mindful,
               stats.productive,
               stats.fit,
-              stats.discipline,
-              stats.balanced,
+              calculatedDiscipline, // use calculated value here
+              calculatedBalanced,   // use calculated value here
             ],
-        
             backgroundColor: "rgba(99, 102, 241, 0.2)",
             borderColor: "rgba(99, 102, 241, 1)",
             borderWidth: 2,
@@ -76,7 +98,6 @@ export function RadarChart({ stats }: RadarChartProps) {
             pointRadius: 4,
           },
         ],
-        
       },
       options: {
         scales: {
@@ -122,14 +143,14 @@ export function RadarChart({ stats }: RadarChartProps) {
         },
       },
     });
-
+  
     return () => {
       if (chartInstance.current) {
         chartInstance.current.destroy();
       }
     };
   }, [stats]);
-
+  console.log(stats.balanced);
   return (
     <div className="flex flex-col md:flex-row">
   <div className="h-80 flex-1">
