@@ -55,11 +55,10 @@ export function Sidebar() {
                 <Link href={item.href} passHref>
                   <Button
                     variant="ghost"
-                    className={`w-full justify-start relative ${
-                      activeItemId === item.id
+                    className={`w-full justify-start relative ${activeItemId === item.id
                         ? "bg-[#5c5470] text-[#f9c80e]"
                         : "text-[#dbd8e3] hover:bg-[#5c5470] hover:text-[#f9c80e]"
-                    }`}
+                      }`}
                   >
                     {activeItemId === item.id && (
                       <motion.div
@@ -85,11 +84,10 @@ export function Sidebar() {
           <Link href="/profile" passHref>
             <Button
               variant="ghost"
-              className={`w-full justify-start relative ${
-                activeItemId === "profile"
+              className={`w-full justify-start relative ${activeItemId === "profile"
                   ? "bg-[#5c5470] text-[#f9c80e]"
                   : "text-[#dbd8e3] hover:bg-[#5c5470] hover:text-[#f9c80e]"
-              }`}
+                }`}
             >
               {activeItemId === "profile" && (
                 <motion.div
@@ -100,10 +98,15 @@ export function Sidebar() {
                   transition={{ duration: 0.2 }}
                 />
               )}
-              <div className="h-8 w-12 bg-[#f9c80e] flex items-center justify-center text-black mr-2 border-2 border-black">
+              {/* <div className="h-8 w-12 bg-[#f9c80e] flex items-center justify-center text-black mr-2 border-2 border-black">
                 <span className="text-xs font-medium">LV1</span>
-              </div>
+              </div> */}
               <span className="hidden md:inline-block text-xs">CHARACTER</span>
+              <img
+                src="/favicon.ico" // replace with your favicon path
+                alt="Character Icon"
+                className="h-10 w-10"
+              />
             </Button>
           </Link>
         </div>

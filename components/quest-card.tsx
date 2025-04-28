@@ -31,6 +31,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { Quest } from "@/lib/types";
+import { calculatePointsReward } from "@/lib/firestore";
 
 interface QuestCardProps {
   quest: Quest;
@@ -155,9 +156,16 @@ export function QuestCard({ quest, onComplete, onUpdateTime }: QuestCardProps) {
             </h3>
             <p className="text-xs text-[#dbd8e3] mb-4">{quest.description}</p>
 
+            {/* <div className="flex items-center text-xs text-[#dbd8e3]">
+              <Clock className="h-4 w-4 mr-1 pixel-icon" />
+              <span>{quest.estimatedTime} min</span>
+            </div> */}
             <div className="flex items-center text-xs text-[#dbd8e3]">
               <Clock className="h-4 w-4 mr-1 pixel-icon" />
               <span>{quest.estimatedTime} min</span>
+              <span className="ml-2 text-[#f9c80e]">
+                (Points: {calculatePointsReward({ ...quest, estimatedTime: quest.estimatedTime })})
+              </span>
             </div>
           </div>
         </CardContent>
@@ -237,7 +245,11 @@ export function QuestCard({ quest, onComplete, onUpdateTime }: QuestCardProps) {
                 id="time"
                 type="number"
                 value={newTime}
-                onChange={(e) => setNewTime(e.target.value)}
+                onChange={(e) => {
+                  const val = Math.min(Number(e.target.value), 240);
+                  setNewTime(val.toString());
+                }}
+                max="240"
                 className="col-span-3 bg-[#5c5470] border-[#dbd8e3] text-[#dbd8e3]"
                 min="0"
               />
