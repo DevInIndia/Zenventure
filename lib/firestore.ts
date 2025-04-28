@@ -424,9 +424,10 @@ export async function updateQuestTime(questId: string, newTime: number) {
 }
 
 // 9. Create a custom quest
-export async function createCustomQuest(
-  questData: Omit<Quest, "id" | "createdBy" | "createdAt" | "pointsReward">
-) {
+// export async function createCustomQuest(
+//   questData: Omit<Quest, "id" | "createdBy" | "createdAt" | "pointsReward">
+// ) {
+export async function createCustomQuest(questData: Omit<Quest, "id">) {
   const uid = getUserId();
   const userRef = doc(db, "users", uid);
 
@@ -436,7 +437,9 @@ export async function createCustomQuest(
     id: crypto.randomUUID(),
     createdBy: "user",
     createdAt: new Date(),
-    pointsReward: calculatePointsReward(questData as Quest),
+    // pointsReward: calculatePointsReward(questData as Quest),
+    pointsReward:
+      questData.pointsReward || calculatePointsReward(questData as Quest),
   };
 
   // Add to active quests and user quests

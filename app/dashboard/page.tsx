@@ -18,11 +18,13 @@ import {
   updateQuestTime,
   createCustomQuest,
 } from "@/lib/firestore";
-import type { Quest } from "@/lib/types";
+import type { Quest, UserProfile } from "@/lib/types";
 import { LoadingScreen } from "@/components/loading-screen";
+import { AiInsightBox } from "@/components/ai-insight-box";
 
 export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [userName, setUserName] = useState("");
   const [activeQuests, setActiveQuests] = useState<Quest[]>([]);
   const [completedQuests, setCompletedQuests] = useState<Quest[]>([]);
@@ -44,6 +46,7 @@ export default function DashboardPage() {
 
           if (userProfile) {
             // User exists, load their data
+            setUserProfile(userProfile); // <-- Set the full profile
             setUserName(userProfile.displayName || "Adventurer");
             setActiveQuests(userProfile.activeQuests || []);
             setCompletedQuests(userProfile.completedQuests || []);
@@ -109,9 +112,10 @@ export default function DashboardPage() {
     }
   };
 
-  const handleCreateQuest = async (
-    quest: Omit<Quest, "id" | "createdBy" | "createdAt">
-  ) => {
+  // const handleCreateQuest = async (
+  //   quest: Omit<Quest, "id" | "createdBy" | "createdAt">
+  // ) => {
+  const handleCreateQuest = async (quest: Omit<Quest, "id">) => {
     try {
       // Create a new quest in Firestore
       const newQuest = await createCustomQuest(quest);
@@ -181,6 +185,8 @@ export default function DashboardPage() {
                   onCreateQuest={handleCreateQuest}
                 />
               </div>
+
+              <AiInsightBox userProfile={userProfile} />
 
               <Tabs defaultValue="active" className="w-full">
                 <TabsList className="grid grid-cols-2 bg-[#5c5470] border-4 border-black p-0">

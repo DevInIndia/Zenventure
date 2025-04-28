@@ -27,7 +27,8 @@ import { Plus } from "lucide-react";
 import type { Quest } from "@/lib/types";
 
 interface NewQuestModalProps {
-  onCreateQuest: (quest: Omit<Quest, "id" | "createdBy" | "createdAt">) => void;
+  // onCreateQuest: (quest: Omit<Quest, "id" | "createdBy" | "createdAt">) => void;
+  onCreateQuest: (quest: Omit<Quest, "id">) => void;
   children?: React.ReactNode;
 }
 
@@ -57,7 +58,8 @@ export function NewQuestModal({ onCreateQuest, children }: NewQuestModalProps) {
       const xpReward = Math.round(basePoints * categoryMultiplier);
 
       // Create the new quest
-      const newQuest: Omit<Quest, "id" | "createdBy" | "createdAt"> = {
+      // const newQuest: Omit<Quest, "id" | "createdBy" | "createdAt"> = {
+      const newQuest: Omit<Quest, "id"> = {
         title,
         description,
         category,
@@ -69,6 +71,10 @@ export function NewQuestModal({ onCreateQuest, children }: NewQuestModalProps) {
             : "easy",
         xpReward,
         estimatedTime: Number.parseInt(estimatedTime) || 0,
+        // pointsReward: 0,
+        createdBy: "user",
+        createdAt: new Date(),
+        pointsReward: Math.round(basePoints * categoryMultiplier * 0.5), // Half of XP for points
       };
 
       onCreateQuest(newQuest);
