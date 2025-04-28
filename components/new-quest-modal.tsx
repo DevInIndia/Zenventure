@@ -69,6 +69,7 @@ export function NewQuestModal({ onCreateQuest, children }: NewQuestModalProps) {
             : "easy",
         xpReward,
         estimatedTime: Number.parseInt(estimatedTime) || 0,
+        pointsReward: 0,
       };
 
       onCreateQuest(newQuest);
