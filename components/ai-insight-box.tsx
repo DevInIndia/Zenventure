@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, Sparkles, Lightbulb } from "lucide-react";
 import type { UserProfile } from "@/lib/types";
-import { generateInsight } from "@/lib/gemini";
 
 interface AiInsightBoxProps {
   userProfile: UserProfile | null;
@@ -19,34 +18,6 @@ export function AiInsightBox({ userProfile, onRefresh }: AiInsightBoxProps) {
   const [characterState, setCharacterState] = useState<
     "idle" | "thinking" | "speaking"
   >("idle");
-
-  // Memoized fetch function to prevent unnecessary recreations
-  // const fetchInsight = useCallback(async () => {
-  //   if (!userProfile) return; // <-- Add this check
-  //   setIsLoading(true);
-  //   setCharacterState("thinking");
-
-  //   try {
-  //     // Call the actual Gemini API through our generateInsight function
-  //     const generatedInsight = await generateInsight(userProfile);
-  //     setInsight(generatedInsight);
-  //     setCharacterState("speaking");
-
-  //     // Return to idle state after display
-  //     setTimeout(() => {
-  //       setCharacterState("idle");
-  //     }, 5000);
-  //   } catch (error) {
-  //     console.error("Error fetching insight:", error);
-  //     setInsight(
-  //       "I couldn't generate an insight right now. Please try again later."
-  //     );
-  //     setCharacterState("idle");
-  //   } finally {
-  //     setIsLoading(false);
-  //     if (onRefresh) onRefresh();
-  //   }
-  // }, [userProfile, onRefresh]);
 
   const fetchInsight = useCallback(async () => {
     if (!userProfile) return;
