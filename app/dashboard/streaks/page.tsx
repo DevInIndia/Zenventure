@@ -184,11 +184,10 @@ export default function StreaksPage() {
                                   {[...Array(30)].map((_, i) => (
                                     <div
                                       key={i}
-                                      className={`w-2 h-2 ${
-                                        i < userProfile.currentStreak
-                                          ? "bg-[#f9c80e]"
-                                          : "bg-[#5c5470]"
-                                      } border border-black`}
+                                      className={`w-2 h-2 ${i < userProfile.currentStreak
+                                        ? "bg-[#f9c80e]"
+                                        : "bg-[#5c5470]"
+                                        } border border-black`}
                                     />
                                   ))}
                                 </div>
@@ -221,12 +220,11 @@ export default function StreaksPage() {
                                   {[...Array(7)].map((_, i) => (
                                     <div
                                       key={i}
-                                      className={`w-2 h-2 ${
-                                        i <
+                                      className={`w-2 h-2 ${i <
                                         Math.min(userProfile.currentStreak, 7)
-                                          ? "bg-[#f86624]"
-                                          : "bg-[#5c5470]"
-                                      } border border-black`}
+                                        ? "bg-[#f86624]"
+                                        : "bg-[#5c5470]"
+                                        } border border-black`}
                                     />
                                   ))}
                                 </div>
@@ -260,12 +258,11 @@ export default function StreaksPage() {
                                   {[...Array(10)].map((_, i) => (
                                     <div
                                       key={i}
-                                      className={`w-2 h-2 ${
-                                        i <
+                                      className={`w-2 h-2 ${i <
                                         Math.min(userProfile.currentStreak, 10)
-                                          ? "bg-[#43aa8b]"
-                                          : "bg-[#5c5470]"
-                                      } border border-black`}
+                                        ? "bg-[#43aa8b]"
+                                        : "bg-[#5c5470]"
+                                        } border border-black`}
                                     />
                                   ))}
                                 </div>
@@ -294,8 +291,8 @@ export default function StreaksPage() {
                     CHAIN REACTION REWARDS
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6">
-                  <div className="space-y-6">
+                <CardContent className="p-6 h-[calc(100%-60px)]"> {/* Added fixed height */}
+                  <div className="space-y-6 max-h-[500px] overflow-y-auto pr-2"> {/* Added scroll container */}
                     {activeChains.map((chain) => (
                       <div
                         key={chain.id}
@@ -334,11 +331,10 @@ export default function StreaksPage() {
                             >
                               <div className="flex items-center">
                                 <div
-                                  className={`w-4 h-4 mr-2 ${
-                                    activity.completed
-                                      ? "bg-[#43aa8b]"
-                                      : "bg-[#5c5470]"
-                                  } flex items-center justify-center text-xs border border-black cursor-pointer`}
+                                  className={`w-4 h-4 mr-2 ${activity.completed
+                                    ? "bg-[#43aa8b]"
+                                    : "bg-[#5c5470]"
+                                    } flex items-center justify-center text-xs border border-black cursor-pointer`}
                                   onClick={() =>
                                     !activity.completed &&
                                     handleCompleteActivity(
@@ -350,11 +346,10 @@ export default function StreaksPage() {
                                   {activity.completed ? "✓" : ""}
                                 </div>
                                 <span
-                                  className={`text-xs ${
-                                    activity.completed
-                                      ? "text-[#dbd8e3]"
-                                      : "text-[#dbd8e3]"
-                                  }`}
+                                  className={`text-xs ${activity.completed
+                                    ? "text-[#dbd8e3]"
+                                    : "text-[#dbd8e3]"
+                                    }`}
                                 >
                                   {activity.name}
                                 </span>
@@ -401,8 +396,7 @@ export default function StreaksPage() {
                     {activeChains.length === 0 && (
                       <div className="text-center p-6">
                         <p className="text-[#dbd8e3] mb-4">
-                          All chains completed! Check back tomorrow for new
-                          chains.
+                          All chains completed! Check back tomorrow for new chains.
                         </p>
                         <div className="text-4xl">🎉</div>
                       </div>
