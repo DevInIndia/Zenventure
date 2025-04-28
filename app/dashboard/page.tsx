@@ -112,9 +112,10 @@ export default function DashboardPage() {
     }
   };
 
-  const handleCreateQuest = async (
-    quest: Omit<Quest, "id" | "createdBy" | "createdAt">
-  ) => {
+  // const handleCreateQuest = async (
+  //   quest: Omit<Quest, "id" | "createdBy" | "createdAt">
+  // ) => {
+  const handleCreateQuest = async (quest: Omit<Quest, "id">) => {
     try {
       // Create a new quest in Firestore
       const newQuest = await createCustomQuest(quest);
