@@ -70,7 +70,8 @@ export const mockQuests: Quest[] = [
   {
     id: "7",
     title: "Evening Reflection",
-    description: "Reflect on your day and write down three things you're grateful for",
+    description:
+      "Reflect on your day and write down three things you're grateful for",
     category: "mindfulness",
     difficulty: "easy",
     xpReward: 20,
@@ -136,7 +137,8 @@ export const mockQuests: Quest[] = [
   {
     id: "13",
     title: "Mindful Eating",
-    description: "Eat one meal without distractions, focusing fully on the food",
+    description:
+      "Eat one meal without distractions, focusing fully on the food",
     category: "mindfulness",
     difficulty: "medium",
     xpReward: 25,
@@ -191,7 +193,8 @@ export const mockQuests: Quest[] = [
   {
     id: "18",
     title: "Balance Workout",
-    description: "Do a 20-minute session focused on balance and stability exercises",
+    description:
+      "Do a 20-minute session focused on balance and stability exercises",
     category: "fitness",
     difficulty: "medium",
     xpReward: 35,
