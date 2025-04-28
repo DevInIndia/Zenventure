@@ -57,7 +57,15 @@ export function RadarChart({ stats }: RadarChartProps) {
         datasets: [
           {
             label: "Your Stats",
-            data: [80, 60, 90, 75, 50], // <-- hardcoded dummy values to check visibility
+            // 
+            data: [
+              stats.mindful,
+              stats.productive,
+              stats.fit,
+              stats.discipline,
+              stats.balanced,
+            ],
+        
             backgroundColor: "rgba(99, 102, 241, 0.2)",
             borderColor: "rgba(99, 102, 241, 1)",
             borderWidth: 2,
