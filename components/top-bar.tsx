@@ -28,7 +28,7 @@ interface TopBarProps {
 
 export function TopBar({
   xp,
-  points = 0,
+  points,
   streak,
   mood,
   health,
@@ -83,7 +83,9 @@ export function TopBar({
             <div className="h-8 w-12 bg-[#f9c80e] flex items-center justify-center text-black border-2 border-black">
               <span className="text-xs font-medium">LV{level}</span>
             </div>
-            <div className="ml-2 text-xs text-[#dbd8e3]">XP: {xp}/100</div>
+            <div className="ml-2 text-xs text-[#dbd8e3]">
+              XP: {levelProgress}/100
+            </div>
           </div>
 
           {/* Health Bar */}
